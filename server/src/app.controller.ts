@@ -81,7 +81,7 @@ export class AppController {
     // );
     const { protocol } = req;
     const { host } = headers;
-    const file = createReadStream(
+    const readStream = createReadStream(
       join(process.cwd(), 'uploads', query.fileName),
     );
     res.set({
@@ -89,7 +89,12 @@ export class AppController {
       'Content-Type': 'video/mp4',
       // 'Content-Disposition': `attachment; filename=${query.fileName}`,
     });
-    return new StreamableFile(file);
+    // readStream.on('data', (chunk) => new StreamableFile(chunk)); // <--- the data log gets printed
+    // readStream.on('end', () => console.log('done'));
+    // readStream.on('error', (err) => {
+    //   console.error(err);
+    // });
+    return new StreamableFile(readStream);
     const filePath = protocol + '://' + host + '/' + query.fileName;
 
     const videoPath = join(process.cwd(), 'uploads', query.fileName);
