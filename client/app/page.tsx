@@ -73,14 +73,14 @@ export default function Home() {
         </form>
       </div>
 
-      <div className="p-10 bg-gray-200 flex justify-between items-center mt-24 rounded-xl">
+      <div className="p-10 bg-gray-200 grid grid-cols-4 gap-10 mt-24 rounded-xl">
         {loading ? (
           <div>
             <p>Loading</p>
           </div>
         ) : (
           videoList.map((video) => (
-            <div key={video.id} className="w-[22%] rounded-xl overflow-hidden">
+            <div key={video.id} className="rounded-xl overflow-hidden">
               <video
                 onMouseOver={(event) => {
                   // setVideoList(videoList.map(item => item.id === video.id ? {...item, isHovered: true} : item))
