@@ -73,7 +73,7 @@ export default function Home() {
         </form>
       </div>
 
-      <div className="p-10 bg-gray-200 grid grid-cols-4 gap-10 mt-24 rounded-xl">
+      <div className="p-10 bg-gray-200 grid md:grid-cols-3 lg:grid-cols-4 gap-10 mt-24 rounded-xl">
         {loading ? (
           <div>
             <p>Loading</p>
@@ -107,6 +107,10 @@ export default function Home() {
             </div>
           ))
         )}
+      </div>
+
+      <div className="w-[500px]">
+        <video src="http://localhost:5000/get-file?fileName=2" controls></video>
       </div>
     </main>
   );

@@ -1,7 +1,9 @@
 import {
   Controller,
   Get,
+  Header,
   Headers,
+  HttpStatus,
   Post,
   Query,
   Req,
@@ -63,68 +65,45 @@ export class AppController {
   }
 
   @Get('/get-file')
+  @Header('Accept-Ranges', 'bytes')
+  @Header('Content-Type', 'video/mp4')
   getFile(
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
     @Query() query: { fileName: string },
     @Headers() headers,
     @Req() req: Request,
   ) {
-    // console.log(
-    //   '🚀 ~ file: app.controller.ts:58 ~ AppController ~ req:',
-    //   req.url,
-    //   req.baseUrl,
-    //   req.originalUrl,
-    //   req.hostname,
-    //   req.ip,
-    //   req.subdomains,
-    //   req.route,
-    //   req.path,
-    //   req.protocol,
-    // );
-    const { protocol } = req;
-    const { host } = headers;
-    let { range } = headers;
-    if (!range) range = 'bytes=0-';
+    const videoPath = `uploads/${query.fileName}.mp4`;
+    const { size } = statSync(videoPath);
     console.log(
-      '🚀 ~ file: app.controller.ts:84 ~ AppController ~ range:',
-      range,
+      '🚀 ~ file: video.controller.ts:28 ~ VideoController ~ videoPath:',
+      videoPath,
     );
-    // const readStream = createReadStream(
-    //   join(process.cwd(), 'uploads', query.fileName),
-    // );
-    // res.set({
-    //   'Accept-Ranges': 'bytes',
-    //   'Content-Type': 'video/mp4',
-    //   // 'Content-Disposition': `attachment; filename=${query.fileName}`,
-    // });
-    // // readStream.on('data', (chunk) => new StreamableFile(chunk)); // <--- the data log gets printed
-    // // readStream.on('end', () => console.log('done'));
-    // // readStream.on('error', (err) => {
-    // //   console.error(err);
-    // // });
-    // return new StreamableFile(readStream);
-    // const filePath = protocol + '://' + host + '/' + query.fileName;
-
-    const videoPath = join(process.cwd(), 'uploads', query.fileName);
-
-    // 10 powered by 6 equal 1000000bytes = 1mb
-
-    // // calculating video where to start and where to end.
-    const fileSize = statSync(videoPath).size;
-    const chunkSize = 10 ** 6;
-    const start = Number(range.replace(/\D/g, ''));
-    const end = Math.min(start + chunkSize, fileSize - 1);
-    // const contentLength = end - start + 1;
-    res.set({
-      'Content-Type': 'video/mp4',
-      'Content-Length': end - start,
-      'Content-Range': 'bytes ' + start + '-' + end + '/' + fileSize,
-      'Accept-Ranges': 'bytes',
-    });
-    const fileStream = createReadStream(videoPath, { start, end });
-    return new StreamableFile(fileStream);
-
-    // return filePath;
-    // res.redirect(filePath);
+    const videoRange = headers.range;
+    if (videoRange) {
+      const parts = videoRange.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : size - 1;
+      const chunkSize = end - start + 1;
+      const readStreamfile = createReadStream(videoPath, {
+        start,
+        end,
+        highWaterMark: 60,
+      });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${size}`,
+        'Content-Length': chunkSize,
+      };
+      res.writeHead(HttpStatus.PARTIAL_CONTENT, head); //206
+      readStreamfile.pipe(res);
+      // return new StreamableFile(readStreamfile);
+    } else {
+      const head = {
+        'Content-Length': size,
+      };
+      res.writeHead(HttpStatus.OK, head); //200
+      createReadStream(videoPath).pipe(res);
+      // return new StreamableFile(createReadStream(videoPath));
+    }
   }
 }
