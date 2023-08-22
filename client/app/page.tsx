@@ -2,6 +2,7 @@
 import { VIDEO_LIST_API, VIDEO_UPLOAD_API } from "@/common";
 import { ChangeEvent, useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 type VideoListType = {
   id: number;
@@ -14,7 +15,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [videoList, setVideoList] = useState<VideoListType[]>([]);
   const [file, setFile] = useState<File>();
-  const [isHovered, setIsHovered] = useState(0);
 
   const getAllVideos = async () => {
     setLoading(true);
@@ -59,9 +59,9 @@ export default function Home() {
 
   return (
     <main>
-      <div className="flex justify-center items-center mt-24">
+      <div className="flex justify-center items-center bg-red-200 py-12">
         <form onSubmit={handleVideoUploadSubmit}>
-          <label>Upload Videos:</label>
+          <label>Upload Videos: </label>
           <input
             type="file"
             onChange={(e) => handleUploadFile(e.target.files)}
@@ -69,19 +69,22 @@ export default function Home() {
             name="img"
             accept="video/*"
           />
-          <input className="bg-gray-300 px-6 py-1 rounded-md" type="submit" />
+          <input className="bg-red-500 text-white px-6 py-1 rounded-md" type="submit" />
         </form>
       </div>
 
-      <div className="p-10 bg-gray-200 grid md:grid-cols-3 lg:grid-cols-4 gap-10 mt-24 rounded-xl">
+        
+      <p className="p-10 text-4xl font-bold">All Videos</p>
+      <div className="px-10 pb-10  grid md:grid-cols-3 lg:grid-cols-4 gap-10 rounded-xl">
         {loading ? (
           <div>
             <p>Loading</p>
           </div>
         ) : (
           videoList.map((video) => (
-            <div key={video.id} className="rounded-xl overflow-hidden">
+            <div key={video.id} className="rounded-xl overflow-hidden bg-white shadow-md">
               <video
+              // className="overflow-hidden"
                 onMouseOver={(event) => {
                   // setVideoList(videoList.map(item => item.id === video.id ? {...item, isHovered: true} : item))
                   event.target.muted = true;
@@ -100,17 +103,13 @@ export default function Home() {
               >
                 <source src={video.videoUrl} type="video/mp4" />
               </video>
-              <div className="bg-white p-4">
-                <p className="text-lg">Beautiful Video Name</p>
+              <div className="p-4">
+                <Link href={`videos/${video.id}`} className="text-lg">Beautiful Video Name</Link>
                 {/* <p>==============={String(video.isHovered)}</p> */}
               </div>
             </div>
           ))
         )}
-      </div>
-
-      <div className="w-[500px]">
-        <video src="http://localhost:5000/get-file?fileName=2" controls></video>
       </div>
     </main>
   );

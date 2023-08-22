@@ -34,14 +34,15 @@ export class AppController {
 
     fileList.length &&
       fileList.forEach((name, index) => {
-        const url = protocol + '://' + host + '/' + name;
+        // const url = protocol + '://' + host + '/' + name;
+        const url = `${protocol}://${host}/get-file/?fileName=${name}`;
         const videoPath = join(process.cwd(), 'uploads', name);
         const fileSize = statSync(videoPath).size;
         videoList.push({
           id: index + 1,
           videoUrl: url,
           size: fileSize,
-          isHovered: false,
+          // isHovered: false,
         });
       });
     return videoList;
@@ -73,7 +74,11 @@ export class AppController {
     @Headers() headers,
     @Req() req: Request,
   ) {
-    const videoPath = `uploads/${query.fileName}.mp4`;
+    // const file = createReadStream(
+    //   join(process.cwd(), 'uploads', query.fileName),
+    // );
+    // return new StreamableFile(file);
+    const videoPath = `uploads/${query.fileName}`;
     const { size } = statSync(videoPath);
     console.log(
       '🚀 ~ file: video.controller.ts:28 ~ VideoController ~ videoPath:',
